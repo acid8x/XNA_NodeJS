@@ -66,6 +66,9 @@
     <PlatformTarget>x86</PlatformTarget>
     <XnaCompressContent>True</XnaCompressContent>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>CreatingA2DSprite.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="EngineIoClientDotNet, Version=0.9.22.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\EngineIoClientDotNet.0.9.22\lib\net40\EngineIoClientDotNet.dll</HintPath>

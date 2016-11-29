@@ -39,6 +39,9 @@ namespace CreatingA2DSprite
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.IsFullScreen = true;
+            graphics.PreferredBackBufferHeight = 1080;
+            graphics.PreferredBackBufferWidth = 1920;
             Content.RootDirectory = "Content";
         }
 
