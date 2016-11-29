@@ -146,12 +146,21 @@ namespace CreatingA2DSprite
             if (sprites[0].Position.Y < 0) sprites[0].Position.Y = 0;
             else if ((sprites[0].Position.Y + sprites[0].mSpriteTexture.Height) > graphics.GraphicsDevice.Viewport.Height) sprites[0].Position.Y = graphics.GraphicsDevice.Viewport.Height - sprites[0].mSpriteTexture.Height;
             
-            if (now - players[0].last > 500)
+            if (now - players[0].last > 200)
             {
                 socket.Emit("position", sprites[0].Position.X, sprites[0].Position.Y);
                 players[0].last = now;
             }
 
+            for (int i = 1; i < 8; i++)
+            {
+                Player p = players[i];
+                if (now - p.last > 1000)
+                {
+                    sprites[i].Position.X = -200;
+                    sprites[i].Position.Y = -200;
+                }
+            }
             base.Update(gameTime);
         }
 
