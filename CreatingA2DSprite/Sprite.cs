@@ -12,7 +12,7 @@ namespace CreatingA2DSprite
     {
         public Vector2 Position = new Vector2(0,0);
         public Texture2D mSpriteTexture;
-        public Color color = Color.White;
+        public Color color = new Color(126, 126, 126);
 
         public void LoadContent(ContentManager theContentManager, string theAssetName)
         {

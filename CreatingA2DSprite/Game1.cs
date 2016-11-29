@@ -28,6 +28,7 @@ namespace CreatingA2DSprite
         int index = 1;
         bool ready = false;
         int now = 0;
+        Random r = new Random();
 
         public class Player
         {
@@ -35,14 +36,14 @@ namespace CreatingA2DSprite
             public long id = -1;
             public float x = -1;
             public float y = -1;
-            public int r = 255, g = 255, b = 255;
+            public int r = 126, g = 126, b = 126;
             public int last = -1;
         }
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
-            graphics.IsFullScreen = true;
+            graphics.IsFullScreen = false;
             graphics.PreferredBackBufferHeight = 720;
             graphics.PreferredBackBufferWidth = 1280;
             Content.RootDirectory = "Content";
@@ -60,9 +61,14 @@ namespace CreatingA2DSprite
             {
                 players[0].i = 0;
                 players[0].id = (long)data;
-                players[0].x = 0;
-                players[0].y = 0;
+                players[0].x = r.Next(0, (graphics.PreferredBackBufferWidth - sprites[0].mSpriteTexture.Width));
+                players[0].y = r.Next(0, (graphics.PreferredBackBufferHeight - sprites[0].mSpriteTexture.Height));
                 players[0].last = 0;
+                players[0].r = r.Next(0, 255);
+                players[0].g = r.Next(0, 255);
+                players[0].b = r.Next(0, 255);
+                sprites[0].color = new Color(players[0].r, players[0].g, players[0].b);
+                sprites[0].Position = new Vector2(players[0].x, players[0].y);
                 ready = true;
             });
             
@@ -122,7 +128,7 @@ namespace CreatingA2DSprite
             {
                 sprites[i] = new Sprite();
                 sprites[i].LoadContent(Content, "SquareGuy");
-                sprites[i].Position = new Vector2(-200, -200);
+                sprites[i].Position = new Vector2(i*-100, i*-100);
                 players[i] = new Player();
             }
         }
@@ -138,40 +144,52 @@ namespace CreatingA2DSprite
 
             KeyboardState newState = Keyboard.GetState();
 
+            Vector2 oldPosition = sprites[0].Position;
+
             if (Keyboard.GetState().IsKeyDown(Keys.Escape)) this.Exit();
 
             if (newState.IsKeyDown(Keys.Left)) sprites[0].Position.X -= 3;
             if (newState.IsKeyDown(Keys.Right)) sprites[0].Position.X += 3;
             if (newState.IsKeyDown(Keys.Up)) sprites[0].Position.Y -= 3;
             if (newState.IsKeyDown(Keys.Down)) sprites[0].Position.Y += 3;
-            if (newState.IsKeyDown(Keys.R)) players[0].r++;
-            if (newState.IsKeyDown(Keys.G)) players[0].g++;
-            if (newState.IsKeyDown(Keys.B)) players[0].b++;
+            if (newState.IsKeyDown(Keys.R)) players[0].r+=3;
+            if (newState.IsKeyDown(Keys.G)) players[0].g+=3;
+            if (newState.IsKeyDown(Keys.B)) players[0].b+=3;
 
             if (players[0].r > 255) players[0].r = 0;
             if (players[0].g > 255) players[0].g = 0;
             if (players[0].b > 255) players[0].b = 0;
             Color c = new Color(players[0].r, players[0].g, players[0].b);
             sprites[0].color = c;
-
+            
+            // MY METHOD TO DETECT VIEWPORT BOUNDS
             if (sprites[0].Position.X < 0) sprites[0].Position.X = 0;
             else if ((sprites[0].Position.X + sprites[0].mSpriteTexture.Width) > graphics.GraphicsDevice.Viewport.Width) sprites[0].Position.X = graphics.GraphicsDevice.Viewport.Width - sprites[0].mSpriteTexture.Width;
             if (sprites[0].Position.Y < 0) sprites[0].Position.Y = 0;
             else if ((sprites[0].Position.Y + sprites[0].mSpriteTexture.Height) > graphics.GraphicsDevice.Viewport.Height) sprites[0].Position.Y = graphics.GraphicsDevice.Viewport.Height - sprites[0].mSpriteTexture.Height;
             
+            Rectangle rect = new Rectangle((int)(sprites[0].Position.X - sprites[0].mSpriteTexture.Width / 2), (int)(sprites[0].Position.Y - sprites[0].mSpriteTexture.Height / 2), sprites[0].mSpriteTexture.Width, sprites[0].mSpriteTexture.Height);
+            for (int i = 1; i < 8; i++)
+            {
+                Rectangle otherRect = new Rectangle((int)(sprites[i].Position.X - sprites[i].mSpriteTexture.Width / 2), (int)(sprites[i].Position.Y - sprites[i].mSpriteTexture.Height / 2), sprites[i].mSpriteTexture.Width, sprites[i].mSpriteTexture.Height);
+                if (rect.Intersects(otherRect) /*|| !GraphicsDevice.Viewport.Bounds.Contains(rect)*/) // PREFERED METHOD TO DETECT BOUNDS, BUT THERE IS A SPACE OF HALF SPRITE SIZE FROM REAL BOUND
+                {
+                    sprites[0].Position.X = oldPosition.X - (sprites[0].Position.X - oldPosition.X);
+                    sprites[0].Position.Y = oldPosition.Y - (sprites[0].Position.Y - oldPosition.Y);
+                }
+            }
             if (now - players[0].last > 200)
             {
                 socket.Emit("position", sprites[0].Position.X, sprites[0].Position.Y, players[0].r, players[0].g, players[0].b);
                 players[0].last = now;
             }
-
             for (int i = 1; i < 8; i++)
             {
                 Player p = players[i];
                 if (now - p.last > 1000)
                 {
-                    sprites[i].Position.X = -200;
-                    sprites[i].Position.Y = -200;
+                    sprites[i].Position.X = (i*-100);
+                    sprites[i].Position.Y = (i*-100);
                 }
             }
             base.Update(gameTime);
@@ -182,7 +200,7 @@ namespace CreatingA2DSprite
             graphics.GraphicsDevice.Clear(Color.CornflowerBlue);
 
             spriteBatch.Begin();
-            for (int i = 0; i < 8; i++) sprites[i].Draw(this.spriteBatch);
+            if (ready) for (int i = 0; i < 8; i++) sprites[i].Draw(this.spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
