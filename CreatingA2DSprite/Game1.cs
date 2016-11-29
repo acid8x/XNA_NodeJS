@@ -89,10 +89,7 @@ namespace CreatingA2DSprite
                         sprites[i].Position.Y = gety;
                         p.last = now;
                         found = true;
-                    } else if (now - p.last > 1000)
-                    {
-                        sprites[i].Position.X = -200;
-                        sprites[i].Position.Y = -200;
+                        break;
                     }
                 }
                 if (!found && ready)
