@@ -44,7 +44,7 @@ namespace CreatingA2DSprite
 
         protected override void Initialize()
         {
-            socket = IO.Socket("http://localhost");
+            socket = IO.Socket("http://robo-warz2.com:2222");
             socket.On(Socket.EVENT_CONNECT, () =>
             {
 
@@ -108,7 +108,7 @@ namespace CreatingA2DSprite
             {
                 sprites[i] = new Sprite();
                 sprites[i].LoadContent(Content, "SquareGuy");
-                sprites[i].Position = new Vector2(0, 0);
+                sprites[i].Position = new Vector2(-200, -200);
                 players[i] = new Player();
             }
         }
