@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreatingA2DSprite", "CreatingA2DSprite\CreatingA2DSprite.csproj", "{72F1469A-399E-4993-9B6D-F02DB53E14C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreatingA2DSpriteContent", "CreatingA2DSprite\Content\CreatingA2DSpriteContent.contentproj", "{8673FF46-44EA-4DF5-92AE-5ED5F98BB906}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{72F1469A-399E-4993-9B6D-F02DB53E14C1}.Debug|x86.ActiveCfg = Debug|x86
+		{72F1469A-399E-4993-9B6D-F02DB53E14C1}.Debug|x86.Build.0 = Debug|x86
+		{72F1469A-399E-4993-9B6D-F02DB53E14C1}.Release|x86.ActiveCfg = Release|x86
+		{72F1469A-399E-4993-9B6D-F02DB53E14C1}.Release|x86.Build.0 = Release|x86
+		{8673FF46-44EA-4DF5-92AE-5ED5F98BB906}.Debug|x86.ActiveCfg = Debug|x86
+		{8673FF46-44EA-4DF5-92AE-5ED5F98BB906}.Release|x86.ActiveCfg = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
