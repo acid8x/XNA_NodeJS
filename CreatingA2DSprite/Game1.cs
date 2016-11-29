@@ -35,6 +35,7 @@ namespace CreatingA2DSprite
             public long id = -1;
             public float x = -1;
             public float y = -1;
+            public int r = 255, g = 255, b = 255;
             public int last = -1;
         }
 
@@ -69,6 +70,7 @@ namespace CreatingA2DSprite
             {
                 long getid = -1;
                 float getx = -1, gety = -1;
+                int r = 0, g = 0, b = 0;
                 bool found = false;
                 JObject o = JObject.Parse(data.ToString());
 
@@ -79,7 +81,11 @@ namespace CreatingA2DSprite
                     if (name == "id") getid = value.ToObject<long>();
                     if (name == "x") getx = value.ToObject<float>();
                     if (name == "y") gety = value.ToObject<float>();
+                    if (name == "r") r = value.ToObject<int>();
+                    if (name == "g") g = value.ToObject<int>();
+                    if (name == "b") b = value.ToObject<int>();
                 }
+                Color c = new Color(r, g, b);
                 for (int i = 1; i < 8; i++)
                 {
                     Player p = players[i];
@@ -87,6 +93,7 @@ namespace CreatingA2DSprite
                     {
                         sprites[i].Position.X = getx;
                         sprites[i].Position.Y = gety;
+                        sprites[i].color = c;
                         p.last = now;
                         found = true;
                         break;
@@ -137,6 +144,15 @@ namespace CreatingA2DSprite
             if (newState.IsKeyDown(Keys.Right)) sprites[0].Position.X += 3;
             if (newState.IsKeyDown(Keys.Up)) sprites[0].Position.Y -= 3;
             if (newState.IsKeyDown(Keys.Down)) sprites[0].Position.Y += 3;
+            if (newState.IsKeyDown(Keys.R)) players[0].r++;
+            if (newState.IsKeyDown(Keys.G)) players[0].g++;
+            if (newState.IsKeyDown(Keys.B)) players[0].b++;
+
+            if (players[0].r > 255) players[0].r = 0;
+            if (players[0].g > 255) players[0].g = 0;
+            if (players[0].b > 255) players[0].b = 0;
+            Color c = new Color(players[0].r, players[0].g, players[0].b);
+            sprites[0].color = c;
 
             if (sprites[0].Position.X < 0) sprites[0].Position.X = 0;
             else if ((sprites[0].Position.X + sprites[0].mSpriteTexture.Width) > graphics.GraphicsDevice.Viewport.Width) sprites[0].Position.X = graphics.GraphicsDevice.Viewport.Width - sprites[0].mSpriteTexture.Width;
@@ -145,7 +161,7 @@ namespace CreatingA2DSprite
             
             if (now - players[0].last > 200)
             {
-                socket.Emit("position", sprites[0].Position.X, sprites[0].Position.Y);
+                socket.Emit("position", sprites[0].Position.X, sprites[0].Position.Y, players[0].r, players[0].g, players[0].b);
                 players[0].last = now;
             }
 

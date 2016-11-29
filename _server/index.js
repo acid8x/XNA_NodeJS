@@ -19,13 +19,14 @@ io.on('connection', function(socket) {
 	
 	console.log("new connection " + socket.ident);
 	
-  socket.on('position', function(x,y) {
-    socket.X = x;
-		socket.Y = y;
+  socket.on('position', function(x,y,r,g,b) {
 		socket.broadcast.emit('update', {
 			id: socket.ident,
-			x: socket.X,
-			y: socket.Y
+			x: x,
+			y: y,
+			r: r,
+			g: g,
+			b: b
 		});
   });
 		

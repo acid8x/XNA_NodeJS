@@ -1,3 +1,3 @@
 @echo off
 cd _server
-node .
+node . >> TEST.TXT

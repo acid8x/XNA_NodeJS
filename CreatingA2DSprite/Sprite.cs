@@ -12,6 +12,7 @@ namespace CreatingA2DSprite
     {
         public Vector2 Position = new Vector2(0,0);
         public Texture2D mSpriteTexture;
+        public Color color = Color.White;
 
         public void LoadContent(ContentManager theContentManager, string theAssetName)
         {
@@ -20,7 +21,7 @@ namespace CreatingA2DSprite
         
         public void Draw(SpriteBatch theSpriteBatch)
         {
-            theSpriteBatch.Draw(mSpriteTexture, Position, Color.White);
+            theSpriteBatch.Draw(mSpriteTexture, Position, color);
         }
 
     }
