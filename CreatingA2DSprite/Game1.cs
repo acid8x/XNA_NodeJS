@@ -27,7 +27,7 @@ namespace CreatingA2DSprite
         Player[] players = new Player[8];
         int index = 1;
         bool ready = false;
-        int last = 0;
+        int now = 0;
 
         public class Player
         {
@@ -35,6 +35,7 @@ namespace CreatingA2DSprite
             public long id = -1;
             public float x = -1;
             public float y = -1;
+            public int last = -1;
         }
 
         public Game1()
@@ -60,6 +61,7 @@ namespace CreatingA2DSprite
                 players[0].id = (long)data;
                 players[0].x = 0;
                 players[0].y = 0;
+                players[0].last = 0;
                 ready = true;
             });
             
@@ -78,15 +80,19 @@ namespace CreatingA2DSprite
                     if (name == "x") getx = value.ToObject<float>();
                     if (name == "y") gety = value.ToObject<float>();
                 }
-                for (int i = 0; i < 8; i++)
+                for (int i = 1; i < 8; i++)
                 {
                     Player p = players[i];
                     if (p.id == getid)
                     {
                         sprites[i].Position.X = getx;
                         sprites[i].Position.Y = gety;
+                        p.last = now;
                         found = true;
-                        break;
+                    } else if (now - p.last > 1000)
+                    {
+                        sprites[i].Position.X = -200;
+                        sprites[i].Position.Y = -200;
                     }
                 }
                 if (!found && ready)
@@ -124,7 +130,7 @@ namespace CreatingA2DSprite
 
         protected override void Update(GameTime gameTime)
         {
-            int now = (int)gameTime.TotalGameTime.TotalMilliseconds;
+            now = (int)gameTime.TotalGameTime.TotalMilliseconds;
 
             KeyboardState newState = Keyboard.GetState();
 
@@ -139,11 +145,11 @@ namespace CreatingA2DSprite
             else if ((sprites[0].Position.X + sprites[0].mSpriteTexture.Width) > graphics.GraphicsDevice.Viewport.Width) sprites[0].Position.X = graphics.GraphicsDevice.Viewport.Width - sprites[0].mSpriteTexture.Width;
             if (sprites[0].Position.Y < 0) sprites[0].Position.Y = 0;
             else if ((sprites[0].Position.Y + sprites[0].mSpriteTexture.Height) > graphics.GraphicsDevice.Viewport.Height) sprites[0].Position.Y = graphics.GraphicsDevice.Viewport.Height - sprites[0].mSpriteTexture.Height;
-
-            if (now - last > 500)
+            
+            if (now - players[0].last > 500)
             {
                 socket.Emit("position", sprites[0].Position.X, sprites[0].Position.Y);
-                last = now;
+                players[0].last = now;
             }
 
             base.Update(gameTime);
