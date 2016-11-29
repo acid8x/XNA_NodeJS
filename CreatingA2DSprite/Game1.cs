@@ -27,6 +27,7 @@ namespace CreatingA2DSprite
         Player[] players = new Player[8];
         int index = 1;
         bool ready = false;
+        int last = 0;
 
         public class Player
         {
@@ -40,8 +41,8 @@ namespace CreatingA2DSprite
         {
             graphics = new GraphicsDeviceManager(this);
             graphics.IsFullScreen = true;
-            graphics.PreferredBackBufferHeight = 1080;
-            graphics.PreferredBackBufferWidth = 1920;
+            graphics.PreferredBackBufferHeight = 720;
+            graphics.PreferredBackBufferWidth = 1280;
             Content.RootDirectory = "Content";
         }
 
@@ -123,8 +124,9 @@ namespace CreatingA2DSprite
 
         protected override void Update(GameTime gameTime)
         {
+            int now = (int)gameTime.TotalGameTime.TotalMilliseconds;
+
             KeyboardState newState = Keyboard.GetState();
-            Vector2 old = sprites[0].Position;
 
             if (Keyboard.GetState().IsKeyDown(Keys.Escape)) this.Exit();
 
@@ -138,7 +140,11 @@ namespace CreatingA2DSprite
             if (sprites[0].Position.Y < 0) sprites[0].Position.Y = 0;
             else if ((sprites[0].Position.Y + sprites[0].mSpriteTexture.Height) > graphics.GraphicsDevice.Viewport.Height) sprites[0].Position.Y = graphics.GraphicsDevice.Viewport.Height - sprites[0].mSpriteTexture.Height;
 
-            if (sprites[0].Position != old) socket.Emit("position", sprites[0].Position.X, sprites[0].Position.Y);
+            if (now - last > 500)
+            {
+                socket.Emit("position", sprites[0].Position.X, sprites[0].Position.Y);
+                last = now;
+            }
 
             base.Update(gameTime);
         }
