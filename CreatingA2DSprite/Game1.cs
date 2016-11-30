@@ -28,6 +28,7 @@ namespace CreatingA2DSprite
         int index = 1;
         bool ready = false;
         int now = 0;
+        int speed = 3;
         Random r = new Random();
 
         public class Player
@@ -148,13 +149,14 @@ namespace CreatingA2DSprite
 
             if (Keyboard.GetState().IsKeyDown(Keys.Escape)) this.Exit();
 
-            if (newState.IsKeyDown(Keys.Left)) sprites[0].Position.X -= 3;
-            if (newState.IsKeyDown(Keys.Right)) sprites[0].Position.X += 3;
-            if (newState.IsKeyDown(Keys.Up)) sprites[0].Position.Y -= 3;
-            if (newState.IsKeyDown(Keys.Down)) sprites[0].Position.Y += 3;
+            if (newState.IsKeyDown(Keys.Left)) sprites[0].Position.X -= speed;
+            if (newState.IsKeyDown(Keys.Right)) sprites[0].Position.X += speed;
+            if (newState.IsKeyDown(Keys.Up)) sprites[0].Position.Y -= speed;
+            if (newState.IsKeyDown(Keys.Down)) sprites[0].Position.Y += speed;
             if (newState.IsKeyDown(Keys.R)) players[0].r+=3;
             if (newState.IsKeyDown(Keys.G)) players[0].g+=3;
             if (newState.IsKeyDown(Keys.B)) players[0].b+=3;
+            if (newState.IsKeyDown(Keys.S)) speed++;
 
             if (players[0].r > 255) players[0].r = 0;
             if (players[0].g > 255) players[0].g = 0;
@@ -178,7 +180,7 @@ namespace CreatingA2DSprite
                     sprites[0].Position.Y = oldPosition.Y - (sprites[0].Position.Y - oldPosition.Y);
                 }
             }
-            if (now - players[0].last > 200)
+            //if (now - players[0].last > 200)
             {
                 socket.Emit("position", sprites[0].Position.X, sprites[0].Position.Y, players[0].r, players[0].g, players[0].b);
                 players[0].last = now;
