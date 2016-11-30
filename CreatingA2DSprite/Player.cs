@@ -11,11 +11,12 @@ namespace CreatingA2DSprite
     public class Player
     {
         public bool active = true;
+        public string name = "";
         public long id { get; set; }
         public float x { get; set; }
         public float y { get; set; }
         public int last { get; set; }
-        public Vector2 Position;
+        public Vector2 Position, FontPos, FontOrigin;
         public Texture2D mSpriteTexture;
         public Color color;
 
@@ -32,7 +33,13 @@ namespace CreatingA2DSprite
         {
             Position = new Vector2(x, y);
             theSpriteBatch.Draw(mSpriteTexture, Position, color);
+            if (name != "")
+            {
+                FontOrigin = Game1.Font1.MeasureString(name) / 2;
+                FontPos = new Vector2(x + (mSpriteTexture.Width / 2), y - 16);
+                theSpriteBatch.DrawString(Game1.Font1, name, FontPos, Color.LightGreen,
+                0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
+            }
         }
-
     }
 }

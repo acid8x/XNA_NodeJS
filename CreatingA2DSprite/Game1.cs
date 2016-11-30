@@ -22,6 +22,8 @@ namespace CreatingA2DSprite
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        MouseState mouse, omouse;
+        public static SpriteFont Font1;
         Texture2D texture;
         Socket socket;
         Player myPlayer = null;
@@ -36,6 +38,7 @@ namespace CreatingA2DSprite
             graphics.PreferredBackBufferWidth = vw;
             graphics.PreferredBackBufferHeight = vh;
             Content.RootDirectory = "Content";
+            this.IsMouseVisible = true;
         }
 
         protected override void Initialize()
@@ -115,6 +118,7 @@ namespace CreatingA2DSprite
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             texture = Content.Load<Texture2D>("SquareGuy");
+            Font1 = Content.Load<SpriteFont>("Courier New");
         }
 
         protected override void UnloadContent()
@@ -129,7 +133,7 @@ namespace CreatingA2DSprite
             if (myPlayer != null)
             {
                 now = (int)gameTime.TotalGameTime.TotalMilliseconds;
-
+                
                 KeyboardState newState = Keyboard.GetState();
 
                 Vector2 oldPosition = myPlayer.Position;
@@ -159,6 +163,16 @@ namespace CreatingA2DSprite
                         }
                     }
                 }
+
+                mouse = Mouse.GetState();
+                if (mouse.LeftButton == ButtonState.Pressed && omouse.LeftButton == ButtonState.Released)
+                {
+                    int xpos = mouse.X;
+                    int ypos = mouse.Y;
+                    Rectangle mClick = new Rectangle(xpos, ypos, 1, 1);
+                    if (mClick.Intersects(rect)) myPlayer.name = "myPlayer been clicked";
+                }
+                omouse = mouse;
 
                 if (now - myPlayer.last > 200)
                 {
