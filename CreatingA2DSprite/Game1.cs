@@ -20,16 +20,20 @@ namespace CreatingA2DSprite
 {
     public class Game1 : Microsoft.Xna.Framework.Game
     {
-        GraphicsDeviceManager graphics;
+        public static GraphicsDeviceManager graphics;
+        public static SpriteFont Font1;
+        public static int vw = 1280, vh = 720;
         SpriteBatch spriteBatch;
         MouseState mouse, omouse;
-        public static SpriteFont Font1;
+        KeyboardState newState, oldState;
         Texture2D texture;
         Socket socket;
+        InputBox input = null;
         Player myPlayer = null;
         List<Player> players = null;
+        List<Keys> keys = new List<Keys>();
         Random rand = new Random();
-        int now = 0, vw = 1280, vh = 720;
+        int now = 0;
 
         public Game1()
         {
@@ -119,6 +123,9 @@ namespace CreatingA2DSprite
             spriteBatch = new SpriteBatch(GraphicsDevice);
             texture = Content.Load<Texture2D>("SquareGuy");
             Font1 = Content.Load<SpriteFont>("Courier New");
+            input = new InputBox();
+            Keys k = Keys.A;
+            for (int i = 0; i < 26; i++) keys.Add(k++);
         }
 
         protected override void UnloadContent()
@@ -134,7 +141,7 @@ namespace CreatingA2DSprite
             {
                 now = (int)gameTime.TotalGameTime.TotalMilliseconds;
                 
-                KeyboardState newState = Keyboard.GetState();
+                newState = Keyboard.GetState();
 
                 Vector2 oldPosition = myPlayer.Position;
 
@@ -142,6 +149,14 @@ namespace CreatingA2DSprite
                 if (newState.IsKeyDown(Keys.Right)) myPlayer.x += 3;
                 if (newState.IsKeyDown(Keys.Up)) myPlayer.y -= 3;
                 if (newState.IsKeyDown(Keys.Down)) myPlayer.y += 3;
+
+                if (input.show)
+                {
+                    foreach (Keys k in keys)
+                    {
+                        if (newState.IsKeyDown(k) && oldState.IsKeyUp(k)) input.name += k.ToString();
+                    }
+                }
 
                 if (myPlayer.x < 0) myPlayer.x = 0;
                 else if ((myPlayer.x + myPlayer.mSpriteTexture.Width) > graphics.GraphicsDevice.Viewport.Width) myPlayer.x = graphics.GraphicsDevice.Viewport.Width - myPlayer.mSpriteTexture.Width;
@@ -170,7 +185,7 @@ namespace CreatingA2DSprite
                     int xpos = mouse.X;
                     int ypos = mouse.Y;
                     Rectangle mClick = new Rectangle(xpos, ypos, 1, 1);
-                    if (mClick.Intersects(rect)) myPlayer.name = "myPlayer been clicked";
+                    if (mClick.Intersects(rect)) input.show = !input.show;
                 }
                 omouse = mouse;
 
@@ -179,6 +194,8 @@ namespace CreatingA2DSprite
                     socket.Emit("position", myPlayer.x, myPlayer.y, (int)myPlayer.color.R, (int)myPlayer.color.G, (int)myPlayer.color.B);
                     myPlayer.last = now;
                 }
+
+                oldState = newState;
             }
             base.Update(gameTime);
         }
@@ -190,6 +207,7 @@ namespace CreatingA2DSprite
             spriteBatch.Begin();
             if (myPlayer != null) myPlayer.Draw(spriteBatch);
             if (players != null) foreach (Player p in players) if (p.active) p.Draw(spriteBatch);
+            if (input.show) input.Draw(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
