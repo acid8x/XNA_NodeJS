@@ -31,7 +31,7 @@ namespace CreatingA2DSprite
         List<Player> players = null;
         List<Keys> keys = new List<Keys>();
         Random rand = new Random();
-        int now = 0, vw = 1280, vh = 720;
+        int now = 0, vw = 1280, vh = 720, connectedPlayers = 1;
         bool getKeys = true, exit = false;
 
         public Game1()
@@ -68,12 +68,13 @@ namespace CreatingA2DSprite
                 b = rand.Next(0, 255);
                 Color c = new Color(r, g, b);
                 myPlayer = new Player(texture, c, x, y, (long)data);
-                socket.Emit("position", myPlayer.x, myPlayer.y, myPlayer.color.R, myPlayer.color.G, myPlayer.color.B);
+                socket.Emit("position", myPlayer.hp, myPlayer.name, myPlayer.x, myPlayer.y, myPlayer.color.R, myPlayer.color.G, myPlayer.color.B);
             });
 
             socket.On("update", (data) =>
             {
                 string getname = "";
+				int gethp = -1;
                 long getid = -1;
                 float getx = -1, gety = -1;
                 byte r = 0, g = 0, b = 0;
@@ -84,6 +85,7 @@ namespace CreatingA2DSprite
                 {
                     string name = x.Key;
                     JToken value = x.Value;
+                    if (name == "hp") gethp = value.ToObject<int>();
                     if (name == "name") getname = value.ToObject<string>();
                     if (name == "id") getid = value.ToObject<long>();
                     if (name == "x") getx = value.ToObject<float>();
@@ -103,6 +105,7 @@ namespace CreatingA2DSprite
                             if (p.id == getid)
                             {
                                 found = true;
+						        p.hp = gethp;
                                 p.name = getname;
                                 p.x = getx;
                                 p.y = gety;
@@ -188,15 +191,18 @@ namespace CreatingA2DSprite
                 Rectangle rect = new Rectangle((int)(myPlayer.x - myPlayer.mSpriteTexture.Width / 2), (int)(myPlayer.y - myPlayer.mSpriteTexture.Height / 2), myPlayer.mSpriteTexture.Width, myPlayer.mSpriteTexture.Height);
                 if (players != null)
                 {
+					connectedPlayers = 1;
                     foreach (Player p in players)
                     {
                         if (now - p.last > 1000) p.active = false;
                         else p.active = true;
                         if (p.active)
                         {
+							connectedPlayers++;
                             Rectangle otherRect = new Rectangle((int)(p.x - p.mSpriteTexture.Width / 2), (int)(p.y - p.mSpriteTexture.Height / 2), p.mSpriteTexture.Width, p.mSpriteTexture.Height);
                             if (rect.Intersects(otherRect))
                             {
+																myPlayer.hp -= 5;
                                 myPlayer.x = oldPosition.X - (myPlayer.x - oldPosition.X);
                                 myPlayer.y = oldPosition.Y - (myPlayer.y - oldPosition.Y);
                             }
@@ -206,7 +212,7 @@ namespace CreatingA2DSprite
 
                 if (now - myPlayer.last > 200)
                 {
-                    socket.Emit("position", myPlayer.name, myPlayer.x, myPlayer.y, (int)myPlayer.color.R, (int)myPlayer.color.G, (int)myPlayer.color.B);
+                    socket.Emit("position", myPlayer.hp, myPlayer.name, myPlayer.x, myPlayer.y, (int)myPlayer.color.R, (int)myPlayer.color.G, (int)myPlayer.color.B);
                     myPlayer.last = now;
                 }
             }
@@ -230,6 +236,11 @@ namespace CreatingA2DSprite
                 Vector2 FontPos = new Vector2(vw/2,vh/2);
                 spriteBatch.DrawString(Font1, exitString, FontPos, Color.Black, 0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
             }
+						Color cString = new Color(0,0,0,192);
+						string connectedPlayersString = "Players online: " + connectedPlayers;
+						Vector2 FontOrigin2 = Font1.MeasureString(connectedPlayersString) / 2;
+						Vector2 FontPos2 = new Vector2(vw/2,vh/36);
+						spriteBatch.DrawString(Font1, connectedPlayersString, FontPos2, cString, 0, FontOrigin2, 1.0f, SpriteEffects.None, 0.5f);
             spriteBatch.End();
 
             base.Draw(gameTime);

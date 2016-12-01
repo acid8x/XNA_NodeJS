@@ -19,22 +19,16 @@ io.on('connection', function(socket) {
 	
 	console.log("new connection " + socket.ident);
 	
-  socket.on('position', function(x,y,r,g,b) {
+  socket.on('position', function(h,n,x,y,r,g,b) {
 		socket.broadcast.emit('update', {
+			hp: h,
+			name: n,
 			id: socket.ident,
 			x: x,
 			y: y,
 			r: r,
 			g: g,
 			b: b
-		});
-  });
-	
-
-  socket.on('name', function(n) {
-		socket.broadcast.emit('name', {
-			id: socket.ident,
-			name: n
 		});
   });
 	
