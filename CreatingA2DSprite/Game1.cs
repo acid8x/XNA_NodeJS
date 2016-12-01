@@ -28,12 +28,12 @@ namespace CreatingA2DSprite
         KeyboardState newState, oldState;
         Texture2D texture;
         Socket socket;
-        InputBox input = null;
         Player myPlayer = null;
         List<Player> players = null;
         List<Keys> keys = new List<Keys>();
         Random rand = new Random();
         int now = 0;
+        bool getKeys = false;
 
         public Game1()
         {
@@ -71,9 +71,10 @@ namespace CreatingA2DSprite
                 myPlayer = new Player(texture, c, x, y, (long)data);
                 socket.Emit("position", myPlayer.x, myPlayer.y, myPlayer.color.R, myPlayer.color.G, myPlayer.color.B);
             });
-            
+
             socket.On("update", (data) =>
             {
+                string getname = "";
                 long getid = -1;
                 float getx = -1, gety = -1;
                 byte r = 0, g = 0, b = 0;
@@ -84,6 +85,7 @@ namespace CreatingA2DSprite
                 {
                     string name = x.Key;
                     JToken value = x.Value;
+                    if (name == "name") getname = value.ToObject<string>();
                     if (name == "id") getid = value.ToObject<long>();
                     if (name == "x") getx = value.ToObject<float>();
                     if (name == "y") gety = value.ToObject<float>();
@@ -102,6 +104,7 @@ namespace CreatingA2DSprite
                             if (p.id == getid)
                             {
                                 found = true;
+                                p.name = getname;
                                 p.x = getx;
                                 p.y = gety;
                                 p.color = c;
@@ -123,9 +126,9 @@ namespace CreatingA2DSprite
             spriteBatch = new SpriteBatch(GraphicsDevice);
             texture = Content.Load<Texture2D>("SquareGuy");
             Font1 = Content.Load<SpriteFont>("Courier New");
-            input = new InputBox();
             Keys k = Keys.A;
             for (int i = 0; i < 26; i++) keys.Add(k++);
+            keys.Add(Keys.Space);
         }
 
         protected override void UnloadContent()
@@ -150,12 +153,18 @@ namespace CreatingA2DSprite
                 if (newState.IsKeyDown(Keys.Up)) myPlayer.y -= 3;
                 if (newState.IsKeyDown(Keys.Down)) myPlayer.y += 3;
 
-                if (input.show)
+                if (getKeys)
                 {
                     foreach (Keys k in keys)
                     {
-                        if (newState.IsKeyDown(k) && oldState.IsKeyUp(k)) input.name += k.ToString();
+                        if (newState.IsKeyDown(k) && oldState.IsKeyUp(k))
+                        {
+                            if (myPlayer.name == "Enter your name") myPlayer.name = k.ToString();
+                            else myPlayer.name += k.ToString();
+                        }
                     }
+                    if (newState.IsKeyDown(Keys.Back) && oldState.IsKeyUp(Keys.Back)) if (myPlayer.name.Length > 1) myPlayer.name = myPlayer.name.Remove(myPlayer.name.Length - 1);
+                    if (newState.IsKeyDown(Keys.Enter) && oldState.IsKeyUp(Keys.Enter)) getKeys = false;
                 }
 
                 if (myPlayer.x < 0) myPlayer.x = 0;
@@ -185,13 +194,17 @@ namespace CreatingA2DSprite
                     int xpos = mouse.X;
                     int ypos = mouse.Y;
                     Rectangle mClick = new Rectangle(xpos, ypos, 1, 1);
-                    if (mClick.Intersects(rect)) input.show = !input.show;
+                    if (mClick.Intersects(rect))
+                    {
+                        getKeys = true;
+                        myPlayer.name = "Enter your name";
+                    }
                 }
                 omouse = mouse;
 
                 if (now - myPlayer.last > 200)
                 {
-                    socket.Emit("position", myPlayer.x, myPlayer.y, (int)myPlayer.color.R, (int)myPlayer.color.G, (int)myPlayer.color.B);
+                    socket.Emit("position", myPlayer.name, myPlayer.x, myPlayer.y, (int)myPlayer.color.R, (int)myPlayer.color.G, (int)myPlayer.color.B);
                     myPlayer.last = now;
                 }
 
@@ -207,7 +220,6 @@ namespace CreatingA2DSprite
             spriteBatch.Begin();
             if (myPlayer != null) myPlayer.Draw(spriteBatch);
             if (players != null) foreach (Player p in players) if (p.active) p.Draw(spriteBatch);
-            if (input.show) input.Draw(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);

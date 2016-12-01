@@ -29,7 +29,15 @@ io.on('connection', function(socket) {
 			b: b
 		});
   });
-		
+	
+
+  socket.on('name', function(n) {
+		socket.broadcast.emit('name', {
+			id: socket.ident,
+			name: n
+		});
+  });
+	
 	socket.on('disconnect', function() {
 		console.log(socket.ident + " disconnected");
   });

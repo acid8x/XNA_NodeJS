@@ -37,8 +37,7 @@ namespace CreatingA2DSprite
             {
                 FontOrigin = Game1.Font1.MeasureString(name) / 2;
                 FontPos = new Vector2(x + (mSpriteTexture.Width / 2), y - 16);
-                theSpriteBatch.DrawString(Game1.Font1, name, FontPos, Color.LightGreen,
-                0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
+                theSpriteBatch.DrawString(Game1.Font1, name, FontPos, Color.Black, 0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
             }
         }
     }
