@@ -27,13 +27,16 @@ namespace CreatingA2DSprite
         KeyboardState newState, oldState;
         Texture2D texture;
         Socket socket;
+        MessageBox exitM, help;
         Player myPlayer = null;
         List<Player> players = null;
         List<Keys> keys = new List<Keys>();
         Random rand = new Random();
         int now = 0, vw = 1280, vh = 720, connectedPlayers = 1;
-        bool getKeys = true, exit = false;
-
+        bool getKeys = true;
+        Color cString = new Color(0, 0, 0, 192);
+        Vector2 FontOrigin, FontOrigin2, FontPos;
+        
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -133,6 +136,8 @@ namespace CreatingA2DSprite
             Keys k = Keys.A;
             for (int i = 0; i < 26; i++) keys.Add(k++);
             keys.Add(Keys.Space);
+            exitM = new MessageBox("Exit Game ? (Y/N)", Color.Black, vw / 2, vh / 2, false);
+            help = new MessageBox("'F2' to change your player name", Color.Black, vw / 2, vh / 2, false);
         }
 
         protected override void UnloadContent()
@@ -144,15 +149,22 @@ namespace CreatingA2DSprite
         {
             newState = Keyboard.GetState();
 
-            if (newState.IsKeyDown(Keys.Escape) && oldState.IsKeyUp(Keys.Escape) && !exit) exit = true;
+            if (newState.IsKeyDown(Keys.Escape) && oldState.IsKeyUp(Keys.Escape) && !exitM.mActive) exitM.mActive = true;
 
-            if (exit)
+            if (newState.IsKeyDown(Keys.F1) && oldState.IsKeyUp(Keys.F1)) help.mActive = !help.mActive;
+            if (newState.IsKeyDown(Keys.F2) && oldState.IsKeyUp(Keys.F2))
             {
-                if (newState.IsKeyDown(Keys.Y) && oldState.IsKeyUp(Keys.Y)) this.Exit();
-                if (newState.IsKeyDown(Keys.N) && oldState.IsKeyUp(Keys.N)) exit = false;
+                getKeys = true;
+                myPlayer.name = "Enter your name";
             }
 
-            if (myPlayer != null && !exit)
+            if (exitM.mActive)
+            {
+                if (newState.IsKeyDown(Keys.Y) && oldState.IsKeyUp(Keys.Y)) this.Exit();
+                if (newState.IsKeyDown(Keys.N) && oldState.IsKeyUp(Keys.N)) exitM.mActive = false;
+            }
+
+            if (myPlayer != null && !exitM.mActive)
             {
                 now = (int)gameTime.TotalGameTime.TotalMilliseconds;
                 
@@ -174,7 +186,7 @@ namespace CreatingA2DSprite
                             else if (myPlayer.name.Length < 16) myPlayer.name += k.ToString();
                         }
                     }
-                    if (newState.IsKeyDown(Keys.Back) && oldState.IsKeyUp(Keys.Back)) if (myPlayer.name.Length > 1) myPlayer.name = myPlayer.name.Remove(myPlayer.name.Length - 1);
+                    if (newState.IsKeyDown(Keys.Back) && oldState.IsKeyUp(Keys.Back)) if (myPlayer.name.Length > 0) myPlayer.name = myPlayer.name.Remove(myPlayer.name.Length - 1);
                     if (newState.IsKeyDown(Keys.Enter) && oldState.IsKeyUp(Keys.Enter))
                     {
                         getKeys = false;
@@ -202,7 +214,8 @@ namespace CreatingA2DSprite
                             Rectangle otherRect = new Rectangle((int)(p.x - p.mSpriteTexture.Width / 2), (int)(p.y - p.mSpriteTexture.Height / 2), p.mSpriteTexture.Width, p.mSpriteTexture.Height);
                             if (rect.Intersects(otherRect))
                             {
-																myPlayer.hp -= 5;
+								myPlayer.hp -= 5;
+                                if (myPlayer.hp < 0) myPlayer.hp = 0;
                                 myPlayer.x = oldPosition.X - (myPlayer.x - oldPosition.X);
                                 myPlayer.y = oldPosition.Y - (myPlayer.y - oldPosition.Y);
                             }
@@ -213,7 +226,13 @@ namespace CreatingA2DSprite
                 if (now - myPlayer.last > 200)
                 {
                     socket.Emit("position", myPlayer.hp, myPlayer.name, myPlayer.x, myPlayer.y, (int)myPlayer.color.R, (int)myPlayer.color.G, (int)myPlayer.color.B);
-                    myPlayer.last = now;
+                    myPlayer.last = now;                    
+                }
+
+                if (now - myPlayer.regen > 2000)
+                {
+                    if (myPlayer.hp < myPlayer.maxHp) myPlayer.hp++;
+                    myPlayer.regen = now;
                 }
             }
 
@@ -229,18 +248,10 @@ namespace CreatingA2DSprite
             spriteBatch.Begin();
             if (myPlayer != null) myPlayer.Draw(spriteBatch);
             if (players != null) foreach (Player p in players) if (p.active) p.Draw(spriteBatch);
-            if (exit)
-            {
-                string exitString = "Exit Game ? (Y/N)";
-                Vector2 FontOrigin = Font1.MeasureString(exitString) / 2;
-                Vector2 FontPos = new Vector2(vw/2,vh/2);
-                spriteBatch.DrawString(Font1, exitString, FontPos, Color.Black, 0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
-            }
-						Color cString = new Color(0,0,0,192);
-						string connectedPlayersString = "Players online: " + connectedPlayers;
-						Vector2 FontOrigin2 = Font1.MeasureString(connectedPlayersString) / 2;
-						Vector2 FontPos2 = new Vector2(vw/2,vh/36);
-						spriteBatch.DrawString(Font1, connectedPlayersString, FontPos2, cString, 0, FontOrigin2, 1.0f, SpriteEffects.None, 0.5f);
+            if (exitM.mActive) exitM.Draw(spriteBatch);
+            if (help.mActive) help.Draw(spriteBatch);
+            string connectedPlayersString = "Press 'F1' for help\nPlayers: " + connectedPlayers;
+            spriteBatch.DrawString(Font1, connectedPlayersString, new Vector2(10, 5), cString, 0, new Vector2(0,0), 1.0f, SpriteEffects.None, 0.5f);
             spriteBatch.End();
 
             base.Draw(gameTime);

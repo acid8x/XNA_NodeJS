@@ -16,6 +16,7 @@ namespace CreatingA2DSprite
         public float x { get; set; }
         public float y { get; set; }
         public int last { get; set; }
+        public int regen { get; set; }
         public Vector2 Position, FontPos, FontOrigin;
         public Texture2D mSpriteTexture;
         public Color color;
@@ -49,7 +50,7 @@ namespace CreatingA2DSprite
                 {
                     alpha-=3;
                     if (alpha < 127) alpha = 255;
-                    Color c2 = new Color(0, 0, 0, alpha);
+                    Color c2 = new Color(alpha, 0, 0, alpha);
                     theSpriteBatch.DrawString(Game1.Font1, name, FontPos, c2, 0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
                 }
             }
