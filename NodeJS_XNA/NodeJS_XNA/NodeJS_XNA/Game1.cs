@@ -24,8 +24,10 @@ namespace NodeJS_XNA {
         public KeyboardManager km = new KeyboardManager();
         public Player myPlayer = null;
         public List<Player> players = new List<Player>();
-        public int now = 0;
-        public bool editName = false;
+        public int now = 0, last = 0;
+        public bool editName = false, connected = false;
+        public Vector2 stringPosition, stringOrigin;
+        public string connection = "Connecting ";
 
         public Game1() {
             graphics = new GraphicsDeviceManager(this);
@@ -36,8 +38,8 @@ namespace NodeJS_XNA {
         }
 
         protected override void Initialize() {
-            socket = IO.Socket("http://localhost");
-            socket.On(Socket.EVENT_CONNECT, () => { });
+            socket = IO.Socket("http://robo-warz2.com:2222/");
+            socket.On(Socket.EVENT_CONNECT, () => { connected = true; });
             socket.On("id", (data) => { myPlayer = new Player((long)data); });
             socket.On("update", (data) => {
                 JObject jb = JObject.Parse(data.ToString());
@@ -53,6 +55,7 @@ namespace NodeJS_XNA {
                 }
                 if (!found) players.Add(player);
             });
+            stringPosition = new Vector2(vw / 2, vh / 2);
             base.Initialize();
         }
 
@@ -97,8 +100,14 @@ namespace NodeJS_XNA {
                 {
                     foreach (Player p in players)
                     {
-                        if (now - p.last > 1000) p.active = false;
-                        else p.active = true;
+                        if (now - p.last > 1000)
+                        {
+                            p.active = false;
+                        }
+                        else
+                        {
+                            p.active = true;
+                        }
                         if (p.active)
                         {
                             Rectangle otherRect = new Rectangle((int)(p.x - (texture.Width-14) / 2), (int)(p.y - texture.Height / 2)+10, texture.Width-14, texture.Height-20);
@@ -118,8 +127,28 @@ namespace NodeJS_XNA {
         {
             graphics.GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin();
-            if (myPlayer != null) myPlayer.Draw(spriteBatch,now);
-            foreach (Player p in players) if (p.active) p.Draw(spriteBatch,now);
+            if (connected)
+            {
+                if (myPlayer != null)
+                {
+                    myPlayer.Draw(spriteBatch, now);
+                }
+                foreach (Player p in players)
+                {
+                    if (p.active) p.Draw(spriteBatch, now);
+
+                }
+            }
+            else
+            {
+                if (now - last > 1000)
+                {
+                    last = now;
+                    connection += ".";
+                }
+                stringOrigin = Font1.MeasureString(connection) / 2;
+                spriteBatch.DrawString(Font1, connection, stringPosition, Color.Black, 0, stringOrigin, 1.0f, SpriteEffects.None, 0.5f);
+            }
             spriteBatch.End();
             base.Draw(gameTime);
         }
