@@ -16,7 +16,7 @@ namespace NodeJS_XNA {
     public class Game1 : Microsoft.Xna.Framework.Game {
 
         public static int vw = 800, vh = 450;
-        public static SpriteFont Font1;
+        public static SpriteFont Font1, Font2;
         public static Texture2D texture;
         public GraphicsDeviceManager graphics;
         public SpriteBatch spriteBatch;
@@ -25,7 +25,7 @@ namespace NodeJS_XNA {
         public Player myPlayer = null;
         public List<Player> players = new List<Player>();
         public int now = 0, last = 0;
-        public bool editName = false, connected = false;
+        public bool editName = false, connected = false, debug = true;
         public Vector2 stringPosition, stringOrigin;
         public string connection = "Connecting ";
 
@@ -40,7 +40,9 @@ namespace NodeJS_XNA {
         protected override void Initialize() {
             socket = IO.Socket("http://robo-warz2.com:2222/");
             socket.On(Socket.EVENT_CONNECT, () => { connected = true; });
-            socket.On("id", (data) => { myPlayer = new Player((long)data); });
+            socket.On("id", (data) => {
+                myPlayer = new Player((long)data);
+            });
             socket.On("update", (data) => {
                 JObject jb = JObject.Parse(data.ToString());
                 Player player = jb.ToObject<Player>();
@@ -62,6 +64,7 @@ namespace NodeJS_XNA {
         protected override void LoadContent() {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             Font1 = Content.Load<SpriteFont>("Motorwerk");
+            Font2 = Content.Load<SpriteFont>("Debug");
             texture = Content.Load<Texture2D>("SquareGuy");
         }
         
@@ -74,10 +77,30 @@ namespace NodeJS_XNA {
                 Vector2 oldPosition = new Vector2(myPlayer.x, myPlayer.y);
                 if (!editName)
                 {
-                    if (km.hold(Keys.A)) myPlayer.x -= 5;
-                    if (km.hold(Keys.D)) myPlayer.x += 5;
-                    if (km.hold(Keys.W)) myPlayer.y -= 5;
-                    if (km.hold(Keys.S)) myPlayer.y += 5;
+                    float curTime = gameTime.ElapsedGameTime.Milliseconds/150f;
+                    if (km.hold(Keys.A) && myPlayer.vel.X > -40f) myPlayer.vel.X -= myPlayer.acc.X * curTime;
+                    if (km.hold(Keys.D) && myPlayer.vel.X < 40f) myPlayer.vel.X += myPlayer.acc.X * curTime;
+                    if (km.down(Keys.Space) && myPlayer.state == 0) {
+                        myPlayer.state = 1;                         
+                        myPlayer.pos = new Vector2(myPlayer.x,myPlayer.y);
+                        myPlayer.vel.Y = 0;
+                    } else if (myPlayer.state != 0) {
+                        if (myPlayer.state == 1) myPlayer.vel.Y -= (myPlayer.acc.Y * curTime * 3);
+                        else if (myPlayer.state == 2) myPlayer.vel.Y += (myPlayer.acc.Y * curTime * 2);
+                        myPlayer.y += myPlayer.vel.Y * curTime;
+                        if (myPlayer.y < myPlayer.pos.Y - 100f) myPlayer.state = 2;
+                        if (myPlayer.y > myPlayer.pos.Y)
+                        {
+                            myPlayer.y = myPlayer.pos.Y;
+                            myPlayer.state = 0;
+                        }
+                    }                       
+                    if (km.press(Keys.F1)) debug = !debug;
+                    if (!km.press(Keys.A) && !km.press(Keys.D)) {
+                        if (myPlayer.vel.X > 0) myPlayer.vel.X--;
+                        else if (myPlayer.vel.X < 0) myPlayer.vel.X++;
+                    }
+                    myPlayer.x += (int)(myPlayer.vel.X * curTime);
                 }
                 if (km.press(Keys.Enter))
                 {
@@ -148,6 +171,11 @@ namespace NodeJS_XNA {
                 }
                 stringOrigin = Font1.MeasureString(connection) / 2;
                 spriteBatch.DrawString(Font1, connection, stringPosition, Color.Black, 0, stringOrigin, 1.0f, SpriteEffects.None, 0.5f);
+            }
+            if (debug && myPlayer != null)
+            {
+                string debugString = JObject.FromObject(myPlayer).ToString().Replace("\"", "").Replace("{", "").Replace("}", "").Replace(",", "").Replace("\"", "");
+                spriteBatch.DrawString(Font2, debugString, new Vector2(0, 0), Color.Black, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
             }
             spriteBatch.End();
             base.Draw(gameTime);

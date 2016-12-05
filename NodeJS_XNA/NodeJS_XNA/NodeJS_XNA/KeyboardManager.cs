@@ -27,5 +27,12 @@ namespace NodeJS_XNA {
             if (oldState.IsKeyDown(k) && newState.IsKeyDown(k)) isPressed = true;
             return isPressed;
         }
+
+        public bool down(Keys k)
+        {
+            bool isPressed = false;
+            if (newState.IsKeyDown(k)) isPressed = true;
+            return isPressed;
+        }
     }
 }

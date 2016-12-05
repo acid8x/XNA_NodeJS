@@ -9,16 +9,24 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using Newtonsoft.Json;
 
 namespace NodeJS_XNA {
 
     public class Player {
         public bool active = true;
+        public int state = 0;
         public long id = -1;
         public float x = 100, y = 100;
+        [JsonIgnore]
+        public Vector2 vel = new Vector2(20, 20);
+        [JsonIgnore]
+        public Vector2 acc = new Vector2(30, 30);
+        [JsonIgnore]
+        public Vector2 pos;
         public string name = "";
         public int last = 0, r = 0, g = 0, b = 0, hp = 100, maxHp = 100;
-        
+
         public Player(long Id = -1) {
             Random rand = new Random();
             id = Id;
@@ -27,7 +35,7 @@ namespace NodeJS_XNA {
             x = rand.Next(min,max);
             min = Game1.vh / 4;
             max = min * 3;
-            y = rand.Next(min,max);
+            y = Game1.vh - 100;
             r = rand.Next(0, 255);
             g = rand.Next(0, 255);
             b = rand.Next(0, 255);
