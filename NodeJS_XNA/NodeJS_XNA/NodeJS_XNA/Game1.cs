@@ -124,22 +124,10 @@ namespace NodeJS_XNA {
                 {
                     foreach (Player p in players)
                     {
-                        if (now - p.last > 1000)
-                        {
-                            p.active = false;
-                        }
-                        else
-                        {
-                            p.active = true;
-                        }
                         if (p.active)
                         {
-                            Rectangle otherRect = new Rectangle((int)(p.x - (texture.Width-14) / 2), (int)(p.y - texture.Height / 2)+10, texture.Width-14, texture.Height-20);
-                            if (rect.Intersects(otherRect))
-                            {
-                                if (myPlayer.x > p.x) myPlayer.x += 5;
-                                else myPlayer.x -= 5;
-                            }
+                            Rectangle otherRect = new Rectangle((int)(p.x - texture.Width / 2), (int)(p.y - texture.Height / 2), texture.Width, texture.Height);
+                            if (rect.Intersects(otherRect)) myPlayer.vel *= -1.05f;
                         }
                     }
                 }
@@ -153,15 +141,8 @@ namespace NodeJS_XNA {
             spriteBatch.Begin();
             if (connected)
             {
-                if (myPlayer != null)
-                {
-                    myPlayer.Draw(spriteBatch, now);
-                }
-                foreach (Player p in players)
-                {
-                    if (p.active) p.Draw(spriteBatch, now);
-
-                }
+                if (myPlayer != null) myPlayer.Draw(spriteBatch, now);
+                foreach (Player p in players) p.Draw(spriteBatch, now);
             }
             else
             {
