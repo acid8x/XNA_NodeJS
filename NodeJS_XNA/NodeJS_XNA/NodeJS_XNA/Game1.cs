@@ -74,10 +74,11 @@ namespace NodeJS_XNA {
             if (km.press(Keys.Escape)) this.Exit();
             if (myPlayer != null)
             {
-                Vector2 oldPosition = new Vector2(myPlayer.x, myPlayer.y);
                 if (!editName)
                 {
                     float curTime = gameTime.ElapsedGameTime.Milliseconds/150f;
+                    if (km.down(Keys.A)) myPlayer.facingRight = false;
+                    if (km.down(Keys.D)) myPlayer.facingRight = true;
                     if (km.hold(Keys.A) && myPlayer.vel.X > -40f) myPlayer.vel.X -= myPlayer.acc.X * curTime;
                     if (km.hold(Keys.D) && myPlayer.vel.X < 40f) myPlayer.vel.X += myPlayer.acc.X * curTime;
                     if (km.down(Keys.Space) && myPlayer.state == 0) {
@@ -136,8 +137,8 @@ namespace NodeJS_XNA {
                             Rectangle otherRect = new Rectangle((int)(p.x - (texture.Width-14) / 2), (int)(p.y - texture.Height / 2)+10, texture.Width-14, texture.Height-20);
                             if (rect.Intersects(otherRect))
                             {
-                                myPlayer.x = oldPosition.X - (myPlayer.x - oldPosition.X);
-                                myPlayer.y = oldPosition.Y - (myPlayer.y - oldPosition.Y);
+                                if (myPlayer.x > p.x) myPlayer.x += 5;
+                                else myPlayer.x -= 5;
                             }
                         }
                     }

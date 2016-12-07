@@ -15,9 +15,10 @@ namespace NodeJS_XNA {
 
     public class Player {
         public bool active = true;
+        public bool facingRight = true;
         public int state = 0;
         public long id = -1;
-        public float x = 100, y = 100;
+        public float x, y;
         [JsonIgnore]
         public Vector2 vel = new Vector2(20, 20);
         [JsonIgnore]
@@ -48,7 +49,11 @@ namespace NodeJS_XNA {
             {
                 Vector2 FromPos = new Vector2(x, y);
                 Vector2 FontOrigin = Game1.Font1.MeasureString(name) / 2;
-                theSpriteBatch.Draw(Game1.texture, FromPos, new Color(r, g, b));
+                Rectangle rect = new Rectangle((int)(x - Game1.texture.Width / 2), (int)(y - Game1.texture.Height / 2), Game1.texture.Width, Game1.texture.Height);
+                Color color = new Color(r, g, b);
+                //theSpriteBatch.Draw(Game1.texture, FromPos, color);
+                if (facingRight) theSpriteBatch.Draw(Game1.texture, FromPos, null, color, 0, new Vector2(0,0), 1.0f, SpriteEffects.None, 1.0f);
+                else theSpriteBatch.Draw(Game1.texture, FromPos, null, color, 0, new Vector2(0, 0), 1.0f, SpriteEffects.FlipHorizontally, 1.0f);
                 if (name != "") theSpriteBatch.DrawString(Game1.Font1, name, FromPos, Color.Black, 0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
             }
         }
